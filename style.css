@@ -1,0 +1,883 @@
+/* ============================================
+   CSS VARIABLES & RESET
+   ============================================ */
+:root {
+    --primary: #2563eb;
+    --primary-light: #3b82f6;
+    --primary-dark: #1d4ed8;
+    --secondary: #7c3aed;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --temp-color: #ef4444;
+    --temp-gradient: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    --humidity-color: #3b82f6;
+    --humidity-gradient: linear-gradient(135deg, #74b9ff, #0984e3);
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-card: #1e293b;
+    --bg-card-hover: #273549;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --border-color: #334155;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.4);
+    --radius: 12px;
+    --radius-sm: 8px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+.header {
+    background: linear-gradient(135deg, var(--bg-secondary), #0f172a);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+}
+
+.header-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo i {
+    font-size: 2rem;
+    color: var(--warning);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.logo h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--text-primary), var(--primary-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.header-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.connection-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--warning);
+    animation: blink 1.5s infinite;
+}
+
+.status-dot.online {
+    background: var(--success);
+    animation: none;
+    box-shadow: 0 0 8px var(--success);
+}
+
+.status-dot.offline {
+    background: var(--danger);
+    animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.last-update {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+/* ============================================
+   CONTAINER
+   ============================================ */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* ============================================
+   CURRENT READINGS CARDS
+   ============================================ */
+.current-readings {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    background: var(--bg-card-hover);
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+}
+
+.temperature-card::before {
+    background: var(--temp-gradient);
+}
+
+.humidity-card::before {
+    background: var(--humidity-gradient);
+}
+
+.status-card::before {
+    background: linear-gradient(135deg, var(--success), #059669);
+}
+
+.readings-card::before {
+    background: linear-gradient(135deg, var(--secondary), #6d28d9);
+}
+
+.card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+}
+
+.temperature-card .card-icon { color: var(--temp-color); }
+.humidity-card .card-icon { color: var(--humidity-color); }
+.status-card .card-icon { color: var(--success); }
+.readings-card .card-icon { color: var(--secondary); }
+
+.card-content h3 {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+.card-value {
+    font-size: 2.8rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.temperature-card .card-value { color: var(--temp-color); }
+.humidity-card .card-value { color: var(--humidity-color); }
+
+.card-unit {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.card-gauge {
+    margin-top: 1rem;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.gauge-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease;
+    width: 0%;
+}
+
+.temperature-card .gauge-fill {
+    background: var(--temp-gradient);
+}
+
+.humidity-card .gauge-fill {
+    background: var(--humidity-gradient);
+}
+
+/* ============================================
+   STATISTICS
+   ============================================ */
+.stats-section {
+    margin-bottom: 2rem;
+}
+
+.stats-section h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-primary);
+}
+
+.stats-section h2 i {
+    color: var(--primary-light);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.stat-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    padding: 1.2rem;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+}
+
+.stat-card i {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    color: var(--text-secondary);
+    opacity: 0.5;
+    font-size: 0.85rem;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+.temp-cold { color: #60a5fa; }
+.temp-hot { color: #f87171; }
+.humidity-low { color: #fbbf24; }
+.humidity-high { color: #34d399; }
+
+/* ============================================
+   CHARTS
+   ============================================ */
+.charts-section {
+    margin-bottom: 2rem;
+}
+
+.chart-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.chart-controls h2 {
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chart-controls h2 i {
+    color: var(--primary-light);
+}
+
+.time-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.time-btn {
+    padding: 8px 16px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.time-btn:hover {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+}
+
+.time-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.chart-container {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    min-height: 300px;
+}
+
+/* ============================================
+   DATA TABLE
+   ============================================ */
+.table-section {
+    margin-bottom: 2rem;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.table-header h2 {
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.table-header h2 i {
+    color: var(--primary-light);
+}
+
+.refresh-btn {
+    padding: 8px 20px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.refresh-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.table-wrapper {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border-color);
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+th {
+    padding: 14px 20px;
+    text-align: left;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+}
+
+td {
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    font-size: 0.95rem;
+}
+
+tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.no-data {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 2rem !important;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1.5rem;
+}
+
+.page-btn {
+    padding: 8px 14px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.page-btn:hover {
+    background: var(--bg-card-hover);
+}
+
+.page-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--border-color);
+    font-size: 0.9rem;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .header-info {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .container {
+        padding: 1rem;
+    }
+    
+    .current-readings {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .card-value {
+        font-size: 2rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .chart-controls {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .logo h1 {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .current-readings {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .time-buttons {
+        flex-wrap: wrap;
+    }
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card, .stat-card, .chart-container {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.2s; }
+.card:nth-child(3) { animation-delay: 0.3s; }
+.card:nth-child(4) { animation-delay: 0.4s; }
+
+
+
+## Step 4: ESP32 Arduino Code
+
+### esp32_dht11.ino
+/*
+ * ESP32 + DHT11 Temperature & Humidity Monitor
+ * Sends data to local XAMPP server via HTTP
+ */
+
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <DHT.h>
+
+// ============================================
+// CONFIGURATION - CHANGE THESE!
+// ============================================
+const char* WIFI_SSID     = "YOUR_WIFI_SSID";        // Your WiFi name
+const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";     // Your WiFi password
+
+// Server URL - Use your computer's local IP address
+// Find it by running 'ipconfig' in CMD (look for IPv4 Address)
+const char* SERVER_URL = "http://192.168.1.100/weather/api/save_data.php";
+
+// ============================================
+// PIN CONFIGURATION
+// ============================================
+#define DHTPIN 4          // GPIO4 - DHT11 data pin
+#define DHTTYPE DHT11     // DHT11 sensor
+#define LED_PIN 2         // Built-in LED (GPIO2)
+
+// ============================================
+// TIMING
+// ============================================
+const unsigned long SEND_INTERVAL = 30000;  // Send data every 30 seconds
+const unsigned long WIFI_TIMEOUT  = 20000;  // WiFi connection timeout (20s)
+
+// ============================================
+// OBJECTS
+// ============================================
+DHT dht(DHTPIN, DHTTYPE);
+unsigned long lastSendTime = 0;
+int failCount = 0;
+
+// ============================================
+// SETUP
+// ============================================
+void setup() {
+    Serial.begin(115200);
+    delay(1000);
+    
+    Serial.println();
+    Serial.println("========================================");
+    Serial.println("  ESP32 DHT11 Weather Monitor");
+    Serial.println("========================================");
+    
+    // Initialize LED
+    pinMode(LED_PIN, OUTPUT);
+    digitalWrite(LED_PIN, LOW);
+    
+    // Initialize DHT sensor
+    dht.begin();
+    Serial.println("[OK] DHT11 sensor initialized");
+    
+    // Connect to WiFi
+    connectWiFi();
+}
+
+// ============================================
+// MAIN LOOP
+// ============================================
+void loop() {
+    // Check WiFi connection
+    if (WiFi.status() != WL_CONNECTED) {
+        Serial.println("[WARN] WiFi disconnected! Reconnecting...");
+        connectWiFi();
+    }
+    
+    // Send data at interval
+    unsigned long currentTime = millis();
+    if (currentTime - lastSendTime >= SEND_INTERVAL) {
+        lastSendTime = currentTime;
+        readAndSendData();
+    }
+    
+    delay(100);
+}
+
+// ============================================
+// WIFI CONNECTION
+// ============================================
+void connectWiFi() {
+    Serial.printf("[INFO] Connecting to WiFi: %s", WIFI_SSID);
+    
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    
+    unsigned long startTime = millis();
+    
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+        digitalWrite(LED_PIN, !digitalRead(LED_PIN)); // Blink LED
+        
+        if (millis() - startTime > WIFI_TIMEOUT) {
+            Serial.println("\n[ERROR] WiFi connection timeout!");
+            Serial.println("[INFO] Retrying in 5 seconds...");
+            delay(5000);
+            ESP.restart();
+        }
+    }
+    
+    digitalWrite(LED_PIN, HIGH); // LED on when connected
+    
+    Serial.println();
+    Serial.println("[OK] WiFi Connected!");
+    Serial.printf("[INFO] IP Address: %s\n", WiFi.localIP().toString().c_str());
+    Serial.printf("[INFO] Signal Strength: %d dBm\n", WiFi.RSSI());
+    Serial.printf("[INFO] Server URL: %s\n", SERVER_URL);
+    Serial.println("========================================");
+}
+
+// ============================================
+// READ SENSOR & SEND DATA
+// ============================================
+void readAndSendData() {
+    // Read sensor data
+    float humidity = dht.readHumidity();
+    float temperature = dht.readTemperature(); // Celsius
+    
+    // Validate readings
+    if (isnan(humidity) || isnan(temperature)) {
+        Serial.println("[ERROR] Failed to read from DHT11 sensor!");
+        Serial.println("[INFO] Check wiring: VCC->3.3V, DATA->GPIO4 (with 10k pullup), GND->GND");
+        blinkLED(5, 100); // Fast blink = error
+        return;
+    }
+    
+    // Print readings
+    Serial.println("----------------------------------------");
+    Serial.printf("[DATA] Temperature: %.1f °C\n", temperature);
+    Serial.printf("[DATA] Humidity:    %.1f %%\n", humidity);
+    
+    // Send to server
+    sendToServer(temperature, humidity);
+}
+
+void sendToServer(float temperature, float humidity) {
+    if (WiFi.status() != WL_CONNECTED) {
+        Serial.println("[ERROR] WiFi not connected, cannot send data");
+        return;
+    }
+    
+    HTTPClient http;
+    
+    // Build URL with parameters
+    String url = String(SERVER_URL) + 
+                 "?temperature=" + String(temperature, 1) + 
+                 "&humidity=" + String(humidity, 1);
+    
+    Serial.printf("[HTTP] Sending to: %s\n", url.c_str());
+    
+    http.begin(url);
+    http.setTimeout(10000); // 10 second timeout
+    
+    int httpCode = http.GET();
+    
+    if (httpCode > 0) {
+        String response = http.getString();
+        Serial.printf("[HTTP] Response Code: %d\n", httpCode);
+        Serial.printf("[HTTP] Response: %s\n", response.c_str());
+        
+        if (httpCode == 200) {
+            failCount = 0;
+            blinkLED(2, 200); // Double blink = success
+        } else {
+            failCount++;
+            Serial.printf("[WARN] Server returned code %d\n", httpCode);
+        }
+    } else {
+        failCount++;
+        Serial.printf("[ERROR] HTTP request failed: %s\n", http.errorToString(httpCode).c_str());
+        Serial.println("[INFO] Make sure XAMPP Apache is running and the URL is correct");
+    }
+    
+    http.end();
+    
+    // If too many failures, restart
+    if (failCount >= 10) {
+        Serial.println("[ERROR] Too many failures, restarting ESP32...");
+        delay(2000);
+        ESP.restart();
+    }
+    
+    Serial.println("----------------------------------------");
+}
+
+// ============================================
+// LED HELPER
+// ============================================
+void blinkLED(int times, int delayMs) {
+    for (int i = 0; i < times; i++) {
+        digitalWrite(LED_PIN, LOW);
+        delay(delayMs);
+        digitalWrite(LED_PIN, HIGH);
+        delay(delayMs);
+    }
+}
+
+---
+
+## Step 5: Wiring Diagram
+
+ESP32           DHT11
+------          ------
+3.3V  --------  VCC (Pin 1)
+GPIO4 --------  DATA (Pin 2)  ---- 10kΩ resistor ---- 3.3V
+                (Pin 3 - Not connected)
+GND   --------  GND (Pin 4)
+
+Note: The 10kΩ pull-up resistor goes between DATA and VCC.
+Some DHT11 modules have it built-in.
+
+ESP32 Pinout Reference:
+┌─────────────────────────┐
+│         ESP32            │
+│                          │
+│  3V3 ──── DHT11 VCC     │
+│  D4 ── DHT11 DATA         
+│  GND ──── DHT11 GND     │
+│                          │
+│  GPIO2 ── Built-in LED  │
+│                          │
+└─────────────────────────┘
+
+---
+
+## Step 6: Setup Instructions
+
+### 1. Database Setup
+1. Start XAMPP (Apache + MySQL)
+2. Open http://localhost/phpmyadmin
+3. Click "SQL" tab
+4. Paste and run the setup.sql content
+5. Verify: database "weather_monitoring" and table "sensor_data" exist
+
+### 2. Web Files Setup
+1. Navigate to C:\xampp\htdocs\
+2. Create folder: "weather"
+3. Inside "weather", create folders: "config", "api"
+4. Place files:
+   - C:\xampp\htdocs\weather\config\database.php
+   - C:\xampp\htdocs\weather\api\save_data.php
+   - C:\xampp\htdocs\weather\api\get_data.php
+   - C:\xampp\htdocs\weather\index.html
+   - C:\xampp\htdocs\weather\style.css
+   - C:\xampp\htdocs\weather\script.js
+5. Test: Open http://localhost/weather/
+
+### 3. Find Your Computer's IP Address
+1. Open CMD (Command Prompt)
+2. Type: ipconfig
+3. Look for "IPv4 Address" under your WiFi adapter
+4. Example: 192.168.1.100
+5. Use this IP in the ESP32 code: 
+   "http://192.168.1.100/weather/api/save_data.php"
+
+### 4. ESP32 Setup (VS Code + PlatformIO)
+1. Install VS Code
+2. Install PlatformIO extension
+3. Create new project:
+   - Board: esp32dev
+   - Framework: Arduino
+4. Add library in platformio.ini:
+
+   [env:esp32dev]
+   platform = espressif32
+   board = esp32dev
+   framework = arduino
+   monitor_speed = 115200
+   lib_deps = 
+       adafruit/DHT sensor library@^1.4.4
+       adafruit/Adafruit Unified Sensor@^1.1.9
+
+5. Paste ESP32 code into src/main.cpp
+6. Change WiFi credentials and server IP
+7. Upload to ESP32
+8. Open Serial Monitor (115200 baud)
+
+### 5. Test the API manually
+Open in browser:
+- Save test data:    http://localhost/weather/api/save_data.php?temperature=25.5&humidity=60.2
+- Get latest:        http://localhost/weather/api/get_data.php?action=latest
+- Get history:       http://localhost/weather/api/get_data.php?action=history&hours=24
+- Get stats:         http://localhost/weather/api/get_data.php?action=stats&hours=24
+- Get all (paged):   http://localhost/weather/api/get_data.php?action=all&page=1
