@@ -97,6 +97,93 @@ body {
 /* =========================
    Layout
    ========================= */
+
+/* phone frame container for mobile-style weather app */
+.phone {
+    max-width: 380px;
+    margin: 2rem auto;
+    border: 16px solid #222;
+    border-radius: 36px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+    overflow: hidden;
+    background: var(--bg);
+    position: relative;
+}
+
+.phone::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 140px;
+    height: 24px;
+    background: #111;
+    border-radius: 0 0 20px 20px;
+    z-index: 5;
+}
+
+/* force column layout inside phone */
+.phone .layout {
+    grid-template-columns: 1fr !important;
+}
+
+/* enlarge quick summary for mobile */
+.phone .summary-item {
+    padding: 0.8rem;
+}
+
+.phone .summary-value {
+    font-size: 1.4rem;
+}
+
+.phone .topbar {
+    padding: 0.5rem 1rem;
+    padding-top: 1rem;
+    margin-bottom: 80px; /* space for clouds */
+}
+
+.phone .panel {
+    margin: 0.5rem;
+}
+
+/* clouds animation */
+.clouds {
+    position: absolute;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    height: 120px;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.cloud {
+    position: absolute;
+    top: 20px;
+    width: 120px;
+    height: 60px;
+    background: rgba(255,255,255,0.6);
+    border-radius: 60px;
+    box-shadow: 30px 0 0 rgba(255,255,255,0.6), 60px 0 0 rgba(255,255,255,0.6);
+    animation: cloudMove 30s linear infinite;
+}
+
+.cloud.small {
+    width: 80px;
+    height: 40px;
+    top: 50px;
+    animation-duration: 20s;
+}
+
+@keyframes cloudMove {
+    0% { transform: translateX(-150px); }
+    100% { transform: translateX(450px); }
+}
+
+/* end phone container styles */
+
 .topbar {
     position: sticky;
     top: 0;
