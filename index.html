@@ -1,233 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Weather Monitoring Dashboard</title>
-
-    <link rel="stylesheet" href="style.css" />
-
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Icons -->
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-    />
+  <meta charset="UTF-8">
+  <title>ESP32 DHT11 Dashboard</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f0f0; text-align: center; }
+    h1 { color: #333; }
+    #charts { display: flex; justify-content: space-around; flex-wrap: wrap; margin-top: 30px; }
+    canvas { background: #fff; border-radius: 8px; padding: 20px; margin: 20px; max-width: 500px; }
+    .value { font-size: 2em; margin: 10px 0; }
+  </style>
 </head>
 <body>
-    <!-- Top Navigation -->
-    <header class="topbar">
-        <div class="topbar-left">
-            <div class="brand">
-                <span class="brand-icon">
-                    <i class="fas fa-cloud-sun"></i>
-                </span>
-                <div class="brand-text">
-                    <span class="brand-title">Weather Monitoring</span>
-                    <span class="brand-subtitle">ESP32 & DHT11</span>
-                </div>
-            </div>
-        </div>
-        <div class="topbar-right">
-            <div class="connection-pill" id="connectionStatus">
-                <span class="status-dot"></span>
-                <span class="status-text">Connecting...</span>
-            </div>
-            <div class="topbar-meta">
-                <span id="lastUpdate">Last update: --</span>
-            </div>
-        </div>
-    </header>
 
-    <!-- Quick Summary -->
-    <section class="summary-bar">
-        <div class="summary-item">
-            <div class="summary-label">Current Temperature</div>
-            <div class="summary-value" id="quickTemp">--°C</div>
-        </div>
-        <div class="summary-item">
-            <div class="summary-label">Current Humidity</div>
-            <div class="summary-value" id="quickHumidity">--%</div>
-        </div>
-        <div class="summary-item">
-            <div class="summary-label">Active Alerts</div>
-            <div class="summary-value" id="alertCount">0</div>
-        </div>
-        <div class="summary-item">
-            <div class="summary-label">Last Reading</div>
-            <div class="summary-value" id="quickLastUpdate">--</div>
-        </div>
-    </section>
+  <h1>ESP32 DHT11 Live Dashboard</h1>
 
-    <!-- Optional Alerts List (auto-filled by JS) -->
-    <section class="alerts" id="alertsSection" style="display: none;">
-        <div class="section-header">
-            <h2>Alerts</h2>
-        </div>
-        <div class="alerts-body" id="alertContent">
-            <!-- JS will render alerts here -->
-        </div>
-    </section>
+  <div>
+    <div>Temperature: <span id="tempValue">--</span> °C</div>
+    <div>Humidity: <span id="humValue">--</span> %</div>
+  </div>
 
-    <main class="layout">
-        <!-- Left Column: Current Readings & Stats -->
-        <section class="column column-left">
-            <!-- Current Readings -->
-            <section class="panel">
-                <div class="panel-header">
-                    <h2>Current Readings</h2>
-                </div>
-                <div class="panel-body panel-grid-two">
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <span class="metric-label">Temperature</span>
-                            <i class="fas fa-thermometer-half metric-icon temp"></i>
-                        </div>
-                        <div class="metric-main">
-                            <span class="metric-value" id="currentTemp">--</span>
-                            <span class="metric-unit">°C</span>
-                        </div>
-                        <div class="metric-bar">
-                            <div class="metric-bar-fill temp" id="tempGauge"></div>
-                        </div>
-                    </div>
+  <div id="charts">
+    <canvas id="tempChart"></canvas>
+    <canvas id="humChart"></canvas>
+  </div>
 
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <span class="metric-label">Humidity</span>
-                            <i class="fas fa-tint metric-icon humidity"></i>
-                        </div>
-                        <div class="metric-main">
-                            <span class="metric-value" id="currentHumidity">--</span>
-                            <span class="metric-unit">%</span>
-                        </div>
-                        <div class="metric-bar">
-                            <div class="metric-bar-fill humidity" id="humidityGauge"></div>
-                        </div>
-                    </div>
+  <script>
+    // Your Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBqH95nsWmoZV7xGNHQdqE9JiLIvvzX1Zc",
+      authDomain: "esp32timperature.firebaseapp.com",
+      databaseURL: "https://esp32timperature-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "esp32timperature",
+      storageBucket: "esp32timperature.firebasestorage.app",
+      messagingSenderId: "220730705611",
+      appId: "1:220730705611:web:8f74f1244c6fb511ce3d4e",
+      measurementId: "G-BY0MTVMS34"
+    };
 
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <span class="metric-label">Comfort Level</span>
-                            <i class="fas fa-circle-info metric-icon neutral"></i>
-                        </div>
-                        <div class="metric-main">
-                            <span class="metric-value" id="comfortLevel">--</span>
-                            <span class="metric-unit" id="comfortEmoji">–</span>
-                        </div>
-                    </div>
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
 
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <span class="metric-label">Total Readings</span>
-                            <i class="fas fa-database metric-icon neutral"></i>
-                        </div>
-                        <div class="metric-main">
-                            <span class="metric-value" id="totalReadings">--</span>
-                            <span class="metric-unit">records</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
+    // HTML elements
+    const tempValue = document.getElementById("tempValue");
+    const humValue = document.getElementById("humValue");
 
-            <!-- Statistics -->
-            <section class="panel">
-                <div class="panel-header">
-                    <h2>Last 24 Hours Statistics</h2>
-                </div>
-                <div class="panel-body stats-grid">
-                    <div class="stat-box">
-                        <span class="stat-label">Min Temp</span>
-                        <span class="stat-value" id="minTemp">--°C</span>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-label">Max Temp</span>
-                        <span class="stat-value" id="maxTemp">--°C</span>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-label">Avg Temp</span>
-                        <span class="stat-value" id="avgTemp">--°C</span>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-label">Min Humidity</span>
-                        <span class="stat-value" id="minHumidity">--%</span>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-label">Max Humidity</span>
-                        <span class="stat-value" id="maxHumidity">--%</span>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-label">Avg Humidity</span>
-                        <span class="stat-value" id="avgHumidity">--%</span>
-                    </div>
-                </div>
-            </section>
-        </section>
+    // Chart setup
+    const tempCtx = document.getElementById('tempChart').getContext('2d');
+    const humCtx = document.getElementById('humChart').getContext('2d');
 
-        <!-- Right Column: Charts & Table -->
-        <section class="column column-right">
-            <!-- Charts -->
-            <section class="panel">
-                <div class="panel-header charts-header">
-                    <h2>Historical Data</h2>
-                    <div class="time-filter">
-                        <button class="time-btn" data-hours="1">1H</button>
-                        <button class="time-btn" data-hours="6">6H</button>
-                        <button class="time-btn active" data-hours="24">24H</button>
-                        <button class="time-btn" data-hours="48">48H</button>
-                        <button class="time-btn" data-hours="168">7D</button>
-                    </div>
-                </div>
-                <div class="panel-body">
-                    <div class="chart-two">
-                        <div class="chart-block">
-                            <canvas id="temperatureChart"></canvas>
-                        </div>
-                        <div class="chart-block">
-                            <canvas id="humidityChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </section>
+    const tempChart = new Chart(tempCtx, {
+      type: 'line',
+      data: { labels: [], datasets: [{ label: 'Temperature °C', data: [], borderColor: 'red', fill: false }] },
+      options: { responsive: true, scales: { x: { display: true }, y: { min: 0, max: 50 } } }
+    });
 
-            <!-- Table -->
-            <section class="panel">
-                <div class="panel-header table-header">
-                    <h2>Recent Readings</h2>
-                    <button class="ghost-btn" id="refreshTable">
-                        <i class="fas fa-rotate-right"></i>
-                        Refresh
-                    </button>
-                </div>
-                <div class="panel-body table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Temperature (°C)</th>
-                                <th>Humidity (%)</th>
-                                <th>Date & Time</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody">
-                            <tr>
-                                <td colspan="4" class="table-placeholder">
-                                    Loading data...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="panel-footer pagination" id="pagination"></div>
-            </section>
-        </section>
-    </main>
+    const humChart = new Chart(humCtx, {
+      type: 'line',
+      data: { labels: [], datasets: [{ label: 'Humidity %', data: [], borderColor: 'blue', fill: false }] },
+      options: { responsive: true, scales: { x: { display: true }, y: { min: 0, max: 100 } } }
+    });
 
-    <footer class="footer">
-        <span>ESP32 + DHT11 Weather Monitoring &copy; 2026</span>
-    </footer>
+    // Function to update charts
+    function updateCharts(time, temp, hum) {
+      tempChart.data.labels.push(time);
+      tempChart.data.datasets[0].data.push(temp);
+      if (tempChart.data.labels.length > 20) { // keep last 20 points
+        tempChart.data.labels.shift();
+        tempChart.data.datasets[0].data.shift();
+      }
+      tempChart.update();
 
-    <script src="script.js"></script>
+      humChart.data.labels.push(time);
+      humChart.data.datasets[0].data.push(hum);
+      if (humChart.data.labels.length > 20) {
+        humChart.data.labels.shift();
+        humChart.data.datasets[0].data.shift();
+      }
+      humChart.update();
+    }
+
+    // Listen for Firebase changes
+    const sensorRef = database.ref('/sensor');
+    sensorRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const temp = data.temperature;
+        const hum = data.humidity;
+        const now = new Date().toLocaleTimeString();
+
+        tempValue.innerText = temp.toFixed(1);
+        humValue.innerText = hum.toFixed(1);
+
+        updateCharts(now, temp, hum);
+      }
+    });
+  </script>
+
 </body>
 </html>
