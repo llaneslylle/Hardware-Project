@@ -74,7 +74,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 12px 24px;
-  background: rgba(15,23,42,0.95);
+  background: rgba(15,23,42,0.98); /* slightly darker */
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
 }
@@ -385,7 +385,7 @@ body {
 .log-section { opacity: 1; }
 
 .log-card {
-  background: rgba(15,23,42,0.95);
+  background: rgba(15,23,42,0.98);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -500,7 +500,7 @@ body {
   letter-spacing: 0.06em;
   color: var(--text-muted);
   text-transform: uppercase;
-  background: rgba(15,23,42,0.95);
+  background: rgba(15,23,42,0.98); /* darker footer */
 }
 
 /* ========== Responsive ========== */
