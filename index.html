@@ -20,6 +20,9 @@
 
 <body>
 
+  <!-- Rain effect canvas -->
+  <canvas id="rainCanvas"></canvas>
+
   <!-- Background grid -->
   <div class="bg-grid"></div>
   <div class="bg-glow bg-glow--temp"></div>
@@ -41,16 +44,12 @@
     </div>
   </header>
 
-   <!-- Page title under navbar -->
+    <!-- Page title under navbar -->
   <section class="page-title">
     <h1>Temperature &amp; Humidity</h1>
-        <!-- Picture under the title -->
-    <img src="title-image.png" alt="" />
   </section>
 
     
-   
-
   <!-- Main content -->
   <main class="main">
     <!-- Stat cards row -->
@@ -203,6 +202,7 @@
   </footer>
 
   <!-- Scripts -->
+  <script src="/Image/rain.js"></script>    
   <script src="config.js"></script>
   <script src="supabase.js"></script>
   <script src="charts.js"></script>
