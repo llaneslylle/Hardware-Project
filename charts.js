@@ -1,3 +1,12 @@
+function initAllCharts() {
+  console.log("Charts initialized");
+}
+
+function refreshAllCharts() {
+  console.log("Charts updated");
+}
+
+
 /**
  * charts.js
  * ─────────────────────────────────────────────
