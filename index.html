@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ESP32 Sensor Dashboard</title>
+
+  <!-- Fonts --> <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+
+<body>
+
+ <!-- Loading overlay -->
+  <div id="loader">
+    <!-- GIF or image in the center -->
+    <img src="Image/loader.gif" alt="Loading..." class="loader__image">
+
+    <!-- Optional spinner behind/under the image -->
+    <div class="loader__spinner"></div>
+
+    <div class="loader__text">Loading dashboard…</div>
+  </div>
+  <!-- Rain effect canvas -->
+  <canvas id="rainCanvas"></canvas>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header__brand">
+      <span class="header__icon">💧_🔥</span>
+      <div>
+        <h1 class="header__title">Sensor</h1>
+        <p class="header__sub">ESP32 · DHT11 · Supabase</p>
+      </div>
+    </div>
+    <div class="header__status">
+      <span class="status-dot" id="statusDot"></span>
+      <span class="status-label" id="statusLabel">Connecting…</span>
+      <div class="header__time" id="headerTime">--:--:--</div>
+    </div>
+  </header>
+
+    <!-- Page title under navbar -->
+  <section class="page-title">
+    <h1>Temperature &amp; Humidity</h1>
+    <p>BY</p>
+    <p>Christian Joshua A. Tulod</p>
+  </section>
+
+    
+  <!-- Main content -->
+  <main class="main">
+    <!-- Stat cards row -->
+    <section class="stats">
+
+      <div class="stat-card stat-card--temp" id="tempCard">
+        <div class="stat-card__badge">TEMPERATURE</div>
+        <div class="stat-card__value">
+          <span id="tempValue">--</span>
+          <span class="stat-card__unit">°C</span>
+        </div>
+        <div class="stat-card__meta">
+          <span>↑ Max: <strong id="tempMax">--</strong>°C</span>
+          <span>↓ Min: <strong id="tempMin">--</strong>°C</span>
+          <span>⌀ Avg: <strong id="tempAvg">--</strong>°C</span>
+        </div>
+        <div class="stat-card__status" id="tempStatus">—</div>
+        <div class="stat-card__sparkline">
+          <canvas id="tempSparkline"></canvas>
+        </div>
+      </div>
+
+      <div class="stat-card stat-card--hum" id="humCard">
+        <div class="stat-card__badge">HUMIDITY</div>
+        <div class="stat-card__value">
+          <span id="humValue">--</span>
+          <span class="stat-card__unit">%</span>
+        </div>
+        <div class="stat-card__meta">
+          <span>↑ Max: <strong id="humMax">--</strong>%</span>
+          <span>↓ Min: <strong id="humMin">--</strong>%</span>
+          <span>⌀ Avg: <strong id="humAvg">--</strong>%</span>
+        </div>
+        <div class="stat-card__status" id="humStatus">—</div>
+        <div class="stat-card__sparkline">
+          <canvas id="humSparkline"></canvas>
+        </div>
+      </div>
+
+      <div class="stat-card stat-card--info">
+        <div class="stat-card__badge">READINGS</div>
+        <div class="stat-card__value">
+          <span id="readingCount">--</span>
+          <span class="stat-card__unit" style="font-size:1rem">Total</span>
+        </div>
+        <div class="stat-card__meta">
+          <span>Last: <strong id="lastReadingTime">--</strong></span>
+          <span>Interval: <strong>5s</strong></span>
+        </div>
+        <div class="stat-card__status" id="deviceStatus">Device offline</div>
+        <div class="heat-comfort" id="heatComfort">
+          <span class="heat-label">HEAT INDEX</span>
+          <span class="heat-value" id="heatIndex">--</span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Charts -->
+    <section class="charts">
+
+      <div class="chart-card" id="tempChartCard">
+        <div class="chart-card__header">
+          <div>
+            <h2 class="chart-card__title">Temperature Over Time</h2>
+            <p class="chart-card__desc">Live readings from DHT11 sensor</p>
+          </div>
+          <div class="chart-controls">
+            <button class="range-btn active" data-range="30" data-target="temp">30</button>
+            <button class="range-btn" data-range="60" data-target="temp">60</button>
+            <button class="range-btn" data-range="100" data-target="temp">100</button>
+          </div>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="tempChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card" id="humChartCard">
+        <div class="chart-card__header">
+          <div>
+            <h2 class="chart-card__title">Humidity Over Time</h2>
+            <p class="chart-card__desc">Relative humidity percentage</p>
+          </div>
+          <div class="chart-controls">
+            <button class="range-btn active" data-range="30" data-target="hum">30</button>
+            <button class="range-btn" data-range="60" data-target="hum">60</button>
+            <button class="range-btn" data-range="100" data-target="hum">100</button>
+          </div>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="humChart"></canvas>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Dual-axis combo chart -->
+    <section class="charts charts--single">
+      <div class="chart-card chart-card--combo">
+        <div class="chart-card__header">
+          <div>
+            <h2 class="chart-card__title">Temperature &amp; Humidity Correlation</h2>
+            <p class="chart-card__desc">Dual-axis overlay — last 50 readings</p>
+          </div>
+          <div class="legend">
+            <span class="legend-dot legend-dot--temp"></span><span>Temp</span>
+            <span class="legend-dot legend-dot--hum"></span><span>Humidity</span>
+          </div>
+        </div>
+        <div class="chart-wrapper chart-wrapper--tall">
+          <canvas id="comboChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Log table -->
+    <section class="log-section">
+      <div class="log-card">
+        <div class="log-card__header">
+          <h2 class="chart-card__title">Recent Readings</h2>
+          <button class="export-btn" id="exportBtn">⬇ Export CSV</button>
+        </div>
+        <div class="table-wrapper">
+          <table class="log-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Timestamp</th>
+                <th>Temperature (°C)</th>
+                <th>Humidity (%)</th>
+                <th>Heat Index</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="logTableBody">
+              <tr><td colspan="6" class="log-empty">Awaiting data…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <span>SensorOS Dashboard · ESP32 + DHT11 + Supabase</span>
+    <span id="footerReadings">0 total readings</span>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/Image/rain.js"></script>    
+  <script src="config.js"></script>
+  <script src="supabase.js"></script>
+  <script src="charts.js"></script>
+  <script src="dashboard.js"></script>
+   <script src="loader.js"></script>
+
+
+</body>
+</html>
