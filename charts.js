@@ -3,24 +3,40 @@
  * ─────────────────────────────────────────────
  * All Chart.js chart creation and update logic.
  * Charts: Temperature, Humidity, Combo, Sparklines
+ *
+ * Theme: Deep Space Glassmorphism
  * ─────────────────────────────────────────────
  */
 
 // ── Shared chart defaults ─────────────────────────────────────────────────────
-Chart.defaults.color          = "#8892a4";
-Chart.defaults.borderColor    = "rgba(255,255,255,0.05)";
+Chart.defaults.color          = "#a0aec8";
+Chart.defaults.borderColor    = "rgba(255,255,255,0.04)";
 Chart.defaults.font.family    = "'DM Mono', monospace";
 Chart.defaults.font.size      = 11;
-Chart.defaults.animation.duration = 300;
+Chart.defaults.animation.duration = 400;
 
 const COLORS = {
-  temp:      "#ff6b35",
-  tempFill:  "rgba(255,107,53,0.12)",
-  hum:       "#00d4aa",
-  humFill:   "rgba(0,212,170,0.10)",
-  accent:    "#7b61ff",
-  grid:      "rgba(255,255,255,0.05)",
-  tick:      "#4a5568",
+  // Temperature: vivid violet-magenta
+  temp:      "#c084fc",
+  tempGlow:  "rgba(192,132,252,0.35)",
+  tempFill0: "rgba(192,132,252,0.28)",
+  tempFill1: "rgba(192,132,252,0.00)",
+
+  // Humidity: electric cyan
+  hum:       "#22d3ee",
+  humGlow:   "rgba(34,211,238,0.30)",
+  humFill0:  "rgba(34,211,238,0.22)",
+  humFill1:  "rgba(34,211,238,0.00)",
+
+  // Accent / combo
+  accent:    "#818cf8",
+
+  // Grid & ticks
+  grid:      "rgba(148,163,184,0.07)",
+  tick:      "#475569",
+
+  // Tooltip bg
+  tooltipBg: "rgba(10,12,28,0.92)",
 };
 
 // Shared options for line charts
@@ -32,10 +48,10 @@ function lineOptions(yLabel, color, min = null, max = null) {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: "#181c24",
-        borderColor:     "rgba(255,255,255,0.08)",
+        backgroundColor: COLORS.tooltipBg,
+        borderColor:     "rgba(255,255,255,0.10)",
         borderWidth:     1,
-        padding:         10,
+        padding:         12,
         titleFont:       { family: "'Syne', sans-serif", size: 12, weight: "700" },
         bodyFont:        { family: "'DM Mono', monospace", size: 11 },
         callbacks: {
@@ -47,10 +63,12 @@ function lineOptions(yLabel, color, min = null, max = null) {
       x: {
         ticks: { maxTicksLimit: 6, color: COLORS.tick, maxRotation: 0 },
         grid:  { color: COLORS.grid },
+        border: { color: "transparent" },
       },
       y: {
         ticks: { color: COLORS.tick },
         grid:  { color: COLORS.grid },
+        border: { color: "transparent" },
         min:   min !== null ? min : undefined,
         max:   max !== null ? max : undefined,
         title: { display: true, text: yLabel, color: COLORS.tick, font: { size: 10 } },
@@ -61,7 +79,6 @@ function lineOptions(yLabel, color, min = null, max = null) {
 
 // ── Chart instances ───────────────────────────────────────────────────────────
 let tempChart, humChart, comboChart, tempSparkline, humSparkline;
-// Single shared range so temp & humidity charts always use same window
 let chartRange = CONFIG.DEFAULT_RANGE;
 
 // ── Format timestamp label ────────────────────────────────────────────────────
@@ -75,13 +92,18 @@ function getSlice(range) {
   return DB.readings.slice(-range);
 }
 
+// ── Helper: make gradient ─────────────────────────────────────────────────────
+function makeGradient(ctx, stop0, stop1, height = 220) {
+  const g = ctx.createLinearGradient(0, 0, 0, height);
+  g.addColorStop(0, stop0);
+  g.addColorStop(1, stop1);
+  return g;
+}
+
 // ── Init Temperature Chart ────────────────────────────────────────────────────
 function initTempChart() {
   const ctx = document.getElementById("tempChart").getContext("2d");
-
-  const gradient = ctx.createLinearGradient(0, 0, 0, 220);
-  gradient.addColorStop(0, "rgba(255,107,53,0.25)");
-  gradient.addColorStop(1, "rgba(255,107,53,0)");
+  const gradient = makeGradient(ctx, COLORS.tempFill0, COLORS.tempFill1);
 
   const slice = getSlice(chartRange);
   tempChart = new Chart(ctx, {
@@ -89,16 +111,19 @@ function initTempChart() {
     data: {
       labels:   slice.map((r) => fmtLabel(r.created_at)),
       datasets: [{
-        label:           "Temperature",
-        data:            slice.map((r) => r.temperature),
-        borderColor:     COLORS.temp,
-        backgroundColor: gradient,
-        borderWidth:     2,
-        pointRadius:     3,
-        pointHoverRadius: 6,
+        label:                "Temperature",
+        data:                 slice.map((r) => r.temperature),
+        borderColor:          COLORS.temp,
+        backgroundColor:      gradient,
+        borderWidth:          2.5,
+        pointRadius:          3,
+        pointHoverRadius:     7,
         pointBackgroundColor: COLORS.temp,
-        tension:         0.4,
-        fill:            true,
+        pointBorderColor:     "rgba(192,132,252,0.3)",
+        pointBorderWidth:     3,
+        tension:              0.45,
+        fill:                 true,
+        shadowColor:          COLORS.tempGlow,
       }],
     },
     options: lineOptions("°C", COLORS.temp),
@@ -108,10 +133,7 @@ function initTempChart() {
 // ── Init Humidity Chart ───────────────────────────────────────────────────────
 function initHumChart() {
   const ctx = document.getElementById("humChart").getContext("2d");
-
-  const gradient = ctx.createLinearGradient(0, 0, 0, 220);
-  gradient.addColorStop(0, "rgba(0,212,170,0.22)");
-  gradient.addColorStop(1, "rgba(0,212,170,0)");
+  const gradient = makeGradient(ctx, COLORS.humFill0, COLORS.humFill1);
 
   const slice = getSlice(chartRange);
   humChart = new Chart(ctx, {
@@ -119,19 +141,20 @@ function initHumChart() {
     data: {
       labels:   slice.map((r) => fmtLabel(r.created_at)),
       datasets: [{
-        label:           "Humidity",
-        data:            slice.map((r) => r.humidity),
-        borderColor:     COLORS.hum,
-        backgroundColor: gradient,
-        borderWidth:     2,
-        pointRadius:     3,
-        pointHoverRadius: 6,
+        label:                "Humidity",
+        data:                 slice.map((r) => r.humidity),
+        borderColor:          COLORS.hum,
+        backgroundColor:      gradient,
+        borderWidth:          2.5,
+        pointRadius:          3,
+        pointHoverRadius:     7,
         pointBackgroundColor: COLORS.hum,
-        tension:         0.4,
-        fill:            true,
+        pointBorderColor:     "rgba(34,211,238,0.3)",
+        pointBorderWidth:     3,
+        tension:              0.45,
+        fill:                 true,
       }],
     },
-    // Auto-scale humidity (no fixed 0–100) so small changes are visible
     options: lineOptions("%", COLORS.hum),
   });
 }
@@ -139,7 +162,6 @@ function initHumChart() {
 // ── Init Combo Chart ──────────────────────────────────────────────────────────
 function initComboChart() {
   const ctx = document.getElementById("comboChart").getContext("2d");
-  // Use same shared range so shapes align with the main charts
   const slice = getSlice(chartRange);
 
   comboChart = new Chart(ctx, {
@@ -154,7 +176,8 @@ function initComboChart() {
           backgroundColor: "transparent",
           borderWidth:     2,
           pointRadius:     2,
-          tension:         0.4,
+          pointHoverRadius: 5,
+          tension:         0.45,
           yAxisID:         "yTemp",
         },
         {
@@ -164,9 +187,10 @@ function initComboChart() {
           backgroundColor: "transparent",
           borderWidth:     2,
           pointRadius:     2,
-          tension:         0.4,
+          pointHoverRadius: 5,
+          tension:         0.45,
           yAxisID:         "yHum",
-          borderDash:      [4, 4],
+          borderDash:      [5, 4],
         },
       ],
     },
@@ -177,22 +201,26 @@ function initComboChart() {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: "#181c24",
-          borderColor:     "rgba(255,255,255,0.08)",
+          backgroundColor: COLORS.tooltipBg,
+          borderColor:     "rgba(255,255,255,0.10)",
           borderWidth:     1,
-          padding:         10,
+          padding:         12,
+          titleFont:       { family: "'Syne', sans-serif", size: 12, weight: "700" },
+          bodyFont:        { family: "'DM Mono', monospace", size: 11 },
         },
       },
       scales: {
         x: {
           ticks: { maxTicksLimit: 8, color: COLORS.tick, maxRotation: 0 },
           grid:  { color: COLORS.grid },
+          border: { color: "transparent" },
         },
         yTemp: {
           type:     "linear",
           position: "left",
           ticks:    { color: COLORS.temp },
           grid:     { color: COLORS.grid },
+          border:   { color: "transparent" },
           title:    { display: true, text: "°C", color: COLORS.temp, font: { size: 10 } },
         },
         yHum: {
@@ -200,8 +228,8 @@ function initComboChart() {
           position: "right",
           ticks:    { color: COLORS.hum },
           grid:     { drawOnChartArea: false },
+          border:   { color: "transparent" },
           title:    { display: true, text: "%", color: COLORS.hum, font: { size: 10 } },
-          // Let humidity auto-scale in combo too (easier to see changes)
           min: undefined,
           max: undefined,
         },
@@ -212,7 +240,7 @@ function initComboChart() {
 
 // ── Init Sparklines ───────────────────────────────────────────────────────────
 function initSparklines() {
-  const sparkOpts = (color) => ({
+  const sparkOpts = () => ({
     responsive: false,
     maintainAspectRatio: false,
     plugins: { legend: { display: false }, tooltip: { enabled: false } },
@@ -225,44 +253,44 @@ function initSparklines() {
   });
 
   const tSlice = getSlice(20);
-  tempSparkline = new Chart(
-    document.getElementById("tempSparkline").getContext("2d"),
-    {
-      type: "line",
-      data: {
-        labels:   tSlice.map(() => ""),
-        datasets: [{
-          data:            tSlice.map((r) => r.temperature),
-          borderColor:     COLORS.temp,
-          backgroundColor: "rgba(255,107,53,0.15)",
-          borderWidth:     1.5,
-          tension:         0.4,
-          fill:            true,
-        }],
-      },
-      options: sparkOpts(COLORS.temp),
-    }
-  );
+  const tCtx   = document.getElementById("tempSparkline").getContext("2d");
+  const tGrad  = makeGradient(tCtx, "rgba(192,132,252,0.30)", "rgba(192,132,252,0.00)", 60);
+
+  tempSparkline = new Chart(tCtx, {
+    type: "line",
+    data: {
+      labels:   tSlice.map(() => ""),
+      datasets: [{
+        data:            tSlice.map((r) => r.temperature),
+        borderColor:     COLORS.temp,
+        backgroundColor: tGrad,
+        borderWidth:     1.5,
+        tension:         0.45,
+        fill:            true,
+      }],
+    },
+    options: sparkOpts(),
+  });
 
   const hSlice = getSlice(20);
-  humSparkline = new Chart(
-    document.getElementById("humSparkline").getContext("2d"),
-    {
-      type: "line",
-      data: {
-        labels:   hSlice.map(() => ""),
-        datasets: [{
-          data:            hSlice.map((r) => r.humidity),
-          borderColor:     COLORS.hum,
-          backgroundColor: "rgba(0,212,170,0.12)",
-          borderWidth:     1.5,
-          tension:         0.4,
-          fill:            true,
-        }],
-      },
-      options: sparkOpts(COLORS.hum),
-    }
-  );
+  const hCtx   = document.getElementById("humSparkline").getContext("2d");
+  const hGrad  = makeGradient(hCtx, "rgba(34,211,238,0.25)", "rgba(34,211,238,0.00)", 60);
+
+  humSparkline = new Chart(hCtx, {
+    type: "line",
+    data: {
+      labels:   hSlice.map(() => ""),
+      datasets: [{
+        data:            hSlice.map((r) => r.humidity),
+        borderColor:     COLORS.hum,
+        backgroundColor: hGrad,
+        borderWidth:     1.5,
+        tension:         0.45,
+        fill:            true,
+      }],
+    },
+    options: sparkOpts(),
+  });
 }
 
 // ── Init all charts ───────────────────────────────────────────────────────────
@@ -322,13 +350,11 @@ document.querySelectorAll(".range-btn").forEach((btn) => {
     const range  = parseInt(btn.dataset.range, 10);
     const target = btn.dataset.target;
 
-    // Only clear active within the clicked group
     document.querySelectorAll(`.range-btn[data-target="${target}"]`).forEach((b) =>
       b.classList.remove("active")
     );
     btn.classList.add("active");
 
-    // Any button (temp or hum) controls the shared window
     chartRange = range;
     refreshTempChart();
     refreshHumChart();
